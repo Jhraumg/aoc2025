@@ -16,16 +16,16 @@ fn is_valid_id_full(id: u64) -> bool {
     let number_of_digit = id.ilog10() + 1;
     for size in 1..number_of_digit {
         let size = size + 1;
-        if ! number_of_digit.is_multiple_of(size)  {
+        if !number_of_digit.is_multiple_of(size) {
             continue;
         }
         let split_size = 10u64.pow(number_of_digit / size);
         let pattern = id % split_size;
         let mut remain: u64 = id / split_size;
         while remain > 0 && remain % split_size == pattern {
-            remain /=  split_size
+            remain /= split_size
         }
-        // if we stop before consuming all the id, it is not a repeated sequence
+        // if all fragments were identical, it is a fake id
         if remain == 0 {
             return false;
         };
