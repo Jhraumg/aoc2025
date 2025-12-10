@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 advent_of_code::solution!(9);
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 struct Point {
     x: u64,
     y: u64,
