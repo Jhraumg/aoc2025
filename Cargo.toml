@@ -30,3 +30,4 @@ tinyjson = "2.5.1"
 
 # Solution dependencies
 itertools = "0.14.0"
+z3 =  "0.19.6"

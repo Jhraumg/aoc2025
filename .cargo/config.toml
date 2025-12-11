@@ -10,3 +10,8 @@ time = "run --quiet --release -- time"
 
 [env]
 AOC_YEAR = "2025"
+
+# in .bashrc (because  Z3_SYS_Z3_HEADER needs a win path, not a msys one)
+#export Z3_LIBRARY_PATH_OVERRIDE=
+#export Z3_SYS_Z3_HEADER=
+

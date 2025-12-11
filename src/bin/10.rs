@@ -1,6 +1,9 @@
 use std::cmp::{min};
+use std::collections::HashMap;
 use itertools::Itertools;
 use std::str::FromStr;
+
+use z3::{Optimize, ast::Int};
 
 advent_of_code::solution!(10);
 
@@ -62,10 +65,10 @@ impl FactoryLine {
                     let k = *k;
                     (0..max_len)
                         .combinations(k)
-                        .find(|buttons| {
+                        .any(|buttons| {
                             let mut lights_status = vec![false; self.lights.len()];
                             for b_idx in buttons {
-                                for light_idx in &self.buttons[*b_idx] {
+                                for light_idx in &self.buttons[b_idx] {
                                     lights_status[*light_idx] = !lights_status[*light_idx];
                                 }
                             }
@@ -74,46 +77,37 @@ impl FactoryLine {
                                 .zip(self.lights.iter())
                                 .all(|(status, target)| *status == *target)
                         })
-                        .is_some()
                 }
             })
             .unwrap()
     }
 
-    fn max_button_press(&self, current_button: usize, missing_joltages : &[usize]) -> usize {
-        self.buttons[current_button].iter().map(|j_idx|missing_joltages[*j_idx]).min().unwrap()
-    }
-    fn missing_joltages_on_press_nth_button(&self, n: usize, missing_joltages: &[usize]) -> Option<Vec<usize>> {
-        if self.buttons[n].iter().any(|i| missing_joltages[*i] ==0) { None } else {
-            let mut new_missing = missing_joltages.to_vec();
-            for j in &self.buttons[n] {
-                new_missing[*j] -= 1;
-            }
+    fn min_number_of_press_joltages(&self) -> Option<usize> {
 
-            Some(new_missing)
+        // buttons_var=list(Int(f"b{i}") for i in range(len(buttons)))
+        let buttons:Vec<Int> =(0..self.buttons.len()).map(|i| Int::new_const(format!("b{i}"))).collect();
+        let buttons_by_joltage : HashMap<usize, Vec<usize>> = self.buttons.iter().enumerate().fold(HashMap::new(), |mut acc, (b_idx, joltages)| {
+           for j_idx in joltages {
+               acc.entry(*j_idx).and_modify(|buttons| buttons.push(b_idx)).or_insert(vec![b_idx]);
+           }
+           acc
+        });
+
+        let opt=Optimize::new();
+        for b in &buttons {
+            opt.assert(&b.ge(0));
         }
-    }
-    fn _min_number_of_press_joltages(&self, current_button_idx: usize, missing_joltages: &[usize]) -> Option<usize> {
-        if missing_joltages.iter().all(|joltage| *joltage == 0) { return Some(0); }
-        // println!("current idx{current_button_idx} / {}, missing {:?}",  self.buttons.len(), missing_joltages);
-        if current_button_idx == self.buttons.len() {return None;}
 
-        let max_press= self.max_button_press(current_button_idx, missing_joltages);
-        (0..=max_press).filter_map(|p| {
-            let press = max_press -p ;
-            let mut new_missing= missing_joltages.to_vec();
-            for idx in &self.buttons[current_button_idx] { new_missing[*idx] -= press; }
-
-            self._min_number_of_press_joltages(current_button_idx+1, &new_missing).map(|count| count + press)
-        }).min()
-    }
-
-    fn min_number_of_press_joltages(&self) -> usize {
-        let Some(result) = self._min_number_of_press_joltages(0,&self.joltages) else{
-            unreachable!("No solution for {self:?}");
-        };
-        print!(".");
-        result
+        for (joltage, buttons_idx) in &buttons_by_joltage {
+            opt.assert(&buttons_idx.iter().map(|b_idx|&buttons[*b_idx]).cloned().reduce(|acc,b|acc+b).unwrap().eq(self.joltages[*joltage] as u64));
+        }
+        let cost :Int= buttons.iter().cloned().reduce(|acc, b|acc+b).unwrap();
+        opt.minimize(&cost );
+        if let z3::SatResult::Sat = opt.check(&[]){
+            opt.get_model()?.eval(&cost,true).and_then(|c| c.as_u64()).map(|c| c as usize)
+        }else{
+            None
+        }
     }
 }
 struct Factory {
@@ -134,7 +128,8 @@ impl Factory {
     }
 
     fn min_number_of_press_joltages(&self) -> usize {
-        self.lines.iter().map(|l| l.min_number_of_press_joltages()).sum()
+
+        self.lines.iter().map(|l| l.min_number_of_press_joltages().unwrap()).sum()
     }
 
 }
@@ -176,27 +171,6 @@ mod tests {
 
     #[test]
     fn test_part_two() {
-        //
-        // let line: FactoryLine = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
-        //     .parse()
-        //     .unwrap();
-        // assert_eq!(line.min_number_of_press_joltages(), 10);
-        //
-        // let line: FactoryLine = "[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}"
-        //     .parse()
-        //     .unwrap();
-        // assert_eq!(line.min_number_of_press_joltages(), 12);
-        //
-        // let line: FactoryLine = "[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}"
-        //     .parse()
-        //     .unwrap();
-        // assert_eq!(line.min_number_of_press_joltages(), 11);
-
-        // let line: FactoryLine = "[.##.##] (4,5) (0,5) (2,3) (1,3,5) (0,3,5) (0,2,3,5) (0,1,4) (0,2,4,5) {198,181,22,50,173,65}"
-        //     .parse()
-        //     .unwrap();
-        // assert_eq!(line.min_number_of_press_joltages(), 0);
-
 
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(33));
