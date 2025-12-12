@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use std::str::FromStr;
 
+#[cfg(z3)]
 use z3::{Optimize, ast::Int};
 
 advent_of_code::solution!(10);
@@ -82,8 +83,12 @@ impl FactoryLine {
             .unwrap()
     }
 
+    #[cfg(not(feature = "z3"))]
     fn min_number_of_press_joltages(&self) -> Option<usize> {
-
+        todo!("disabled because z3 build is too slow")
+    }
+    #[cfg(feature = "z3")]
+    fn min_number_of_press_joltages(&self) -> Option<usize> {
         // buttons_var=list(Int(f"b{i}") for i in range(len(buttons)))
         let buttons:Vec<Int> =(0..self.buttons.len()).map(|i| Int::new_const(format!("b{i}"))).collect();
         let buttons_by_joltage : HashMap<usize, Vec<usize>> = self.buttons.iter().enumerate().fold(HashMap::new(), |mut acc, (b_idx, joltages)| {

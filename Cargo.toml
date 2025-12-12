@@ -19,6 +19,7 @@ dhat-heap = ["dhat"]
 today = ["chrono"]
 test_lib = []
 
+
 [dependencies]
 
 # Template dependencies
@@ -30,4 +31,5 @@ tinyjson = "2.5.1"
 
 # Solution dependencies
 itertools = "0.14.0"
-z3 =  "0.19.6"
+
+z3 = { version= "0.19.6", optional = true }
