@@ -2,7 +2,6 @@ use std::collections::{HashMap, HashSet};
 
 advent_of_code::solution!(11);
 
-
 fn count_path(all_path: &HashMap<&str, HashSet<&str>>, entry: &str, out: &str) -> u64 {
     let mut out_by_entry: HashMap<&str, (usize, Vec<&str>)> = all_path
         .iter()
@@ -11,7 +10,10 @@ fn count_path(all_path: &HashMap<&str, HashSet<&str>>, entry: &str, out: &str) -
                 *entry,
                 (
                     outs.iter().filter(|o| **o == out).count(),
-                    outs.iter().filter(|o| **o != out).copied().collect::<Vec<&str>>(),
+                    outs.iter()
+                        .filter(|o| **o != out)
+                        .copied()
+                        .collect::<Vec<&str>>(),
                 ),
             )
         })
@@ -27,17 +29,17 @@ fn count_path(all_path: &HashMap<&str, HashSet<&str>>, entry: &str, out: &str) -
                 let (count, outs) = &out_by_entry[entry];
                 let new_count: usize = count
                     + outs
-                    .iter()
-                    .map(|e| {
-                        if let Some((inner_count, inner_outs)) = out_by_entry.get(e)
-                            && inner_outs.is_empty()
-                        {
-                            *inner_count
-                        } else {
-                            0
-                        }
-                    })
-                    .sum::<usize>();
+                        .iter()
+                        .map(|e| {
+                            if let Some((inner_count, inner_outs)) = out_by_entry.get(e)
+                                && inner_outs.is_empty()
+                            {
+                                *inner_count
+                            } else {
+                                0
+                            }
+                        })
+                        .sum::<usize>();
                 let new_outs = outs
                     .iter()
                     .filter(|e| {
@@ -58,7 +60,6 @@ fn count_path(all_path: &HashMap<&str, HashSet<&str>>, entry: &str, out: &str) -
     out_by_entry[entry].0 as u64
 }
 
-
 pub fn part_one(input: &str) -> Option<u64> {
     let path: HashMap<&str, HashSet<&str>> = input
         .lines()
@@ -72,7 +73,7 @@ pub fn part_one(input: &str) -> Option<u64> {
         })
         .collect();
 
-    Some(count_path(&path,"you","out"))
+    Some(count_path(&path, "you", "out"))
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
@@ -87,7 +88,6 @@ pub fn part_two(input: &str) -> Option<u64> {
             (entry, outs)
         })
         .collect();
-
 
     let dac_to_out_count = count_path(&path, "dac", "out");
     let fft_to_out_count = count_path(&path, "fft", "out");
