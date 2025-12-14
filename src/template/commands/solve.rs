@@ -1,8 +1,9 @@
+use std::ffi::OsString;
 use std::process::{Command, Stdio};
 
 use crate::template::Day;
 
-pub fn handle(day: Day, release: bool, dhat: bool, submit_part: Option<u8>) {
+pub fn handle(day: Day, release: bool, dhat: bool, submit_part: Option<u8>, extra_args: &[OsString]) {
     let mut cmd_args = vec!["run".to_string(), "--bin".to_string(), day.to_string()];
 
     if dhat {
@@ -15,6 +16,9 @@ pub fn handle(day: Day, release: bool, dhat: bool, submit_part: Option<u8>) {
     } else if release {
         cmd_args.push("--release".to_string());
     }
+    for arg in extra_args.iter().filter_map(|a| a.to_str()) {
+        cmd_args.push(arg.to_string());
+    }
 
     cmd_args.push("--".to_string());
 
@@ -22,6 +26,8 @@ pub fn handle(day: Day, release: bool, dhat: bool, submit_part: Option<u8>) {
         cmd_args.push("--submit".to_string());
         cmd_args.push(submit_part.to_string());
     }
+
+    eprintln!("about to run cargo {}", &cmd_args.join(" "));
 
     let mut cmd = Command::new("cargo")
         .args(&cmd_args)

@@ -95,7 +95,9 @@ impl FactoryLine {
     #[cfg(not(feature = "z3"))]
     fn min_number_of_press_joltages(&self) -> Option<usize> {
         let _ = self.joltages;
-        todo!("disabled because z3 build is too slow. Use cargo run --features=z3 --bin 10  to get the actual solution")
+        todo!(
+            "disabled because z3 build is too slow. Use cargo run --features=z3 --bin 10  to get the actual solution"
+        )
     }
     #[cfg(feature = "z3")]
     fn min_number_of_press_joltages(&self) -> Option<usize> {

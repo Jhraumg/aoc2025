@@ -97,8 +97,8 @@ pub fn part_two(input: &str) -> Option<u64> {
     let srv_to_dac_count = count_path(&path, "svr", "dac");
 
     Some(
-        dbg!(srv_to_fft_count) * dbg!(fft_to_dac_count) * dbg!(dac_to_out_count)
-            + dbg!(srv_to_dac_count) * dbg!(dac_to_fft_count) * dbg!(fft_to_out_count),
+        srv_to_fft_count * fft_to_dac_count * dac_to_out_count
+            + srv_to_dac_count * dac_to_fft_count * fft_to_out_count,
     )
 }
 

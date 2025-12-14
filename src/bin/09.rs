@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use std::cmp::{max, min};
 use std::collections::HashSet;
+use rayon::prelude::*;
 
 advent_of_code::solution!(9);
 
@@ -142,8 +143,8 @@ pub fn part_two(input: &str) -> Option<u64> {
         })
         .collect();
 
-    red_tiles
-        .iter()
+    Some(red_tiles
+        .par_iter()
         .filter_map(|p| {
             red_tiles
                 .iter()
@@ -156,7 +157,7 @@ pub fn part_two(input: &str) -> Option<u64> {
                 })
                 .reduce(max)
         })
-        .reduce(max)
+        .reduce(||0u64,max))
 }
 
 #[cfg(test)]
