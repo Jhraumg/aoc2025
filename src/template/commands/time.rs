@@ -1,10 +1,10 @@
-use std::collections::HashSet;
-use std::ffi::OsString;
 use crate::template::run_multi::run_multi;
 use crate::template::timings::Timings;
 use crate::template::{Day, all_days, readme_benchmarks};
+use std::collections::HashSet;
+use std::ffi::OsString;
 
-pub fn handle(day: Option<Day>, run_all: bool, store: bool, extra_args:&[OsString]) {
+pub fn handle(day: Option<Day>, run_all: bool, store: bool, extra_args: &[OsString]) {
     let stored_timings = Timings::read_from_file();
 
     let days_to_run = day.map_or_else(

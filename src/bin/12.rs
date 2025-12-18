@@ -252,6 +252,25 @@ impl Cavern {
         }
     }
     fn presents_fit_under_tree(&self, tree: &Tree, all_shapes: &[Vec<Present>]) -> bool {
+        let max_shape_w = all_shapes.iter().flatten().map(|v| v.maxx).max().unwrap() as usize + 1;
+        let max_shape_h = all_shapes.iter().flatten().map(|v| v.maxy).max().unwrap() as usize + 1;
+        if tree.shape.x as usize / max_shape_w * tree.shape.y as usize / max_shape_h
+            >= tree.presents.iter().copied().sum()
+        {
+            return true;
+        }
+        if (tree.shape.x as usize * tree.shape.y as usize)
+            < (tree
+                .presents
+                .iter()
+                .enumerate()
+                .map(|(pre_idx, count)| all_shapes[pre_idx][0].occupied.len() * *count)
+                .sum())
+        {
+            return false;
+        }
+
+        eprintln!("actual search");
         let variant_counts: Vec<usize> = all_shapes.iter().map(|v| v.len()).collect();
 
         let mut missing_presents = tree.presents.clone();
@@ -267,11 +286,11 @@ impl Cavern {
             if missing_presents.iter().all(|m| *m == 0) {
                 return true;
             }
-            let empty_places = (tree.shape.y as usize - current_pos.y as usize - 1)
+            let empty_places = (tree.shape.y as usize - current_pos.y as usize + 1)
                 * tree.shape.x as usize
                 - current_pos.x as usize;
             if empty_places
-                > missing_presents
+                >= missing_presents
                     .iter()
                     .enumerate()
                     .map(|(pre_idx, count)| all_shapes[pre_idx][0].occupied.len() * *count)
@@ -321,6 +340,7 @@ impl Cavern {
                 }
             }
 
+            println!("no match for {tree:?}");
             return false;
         }
     }

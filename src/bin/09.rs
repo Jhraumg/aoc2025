@@ -1,7 +1,7 @@
 use itertools::Itertools;
+use rayon::prelude::*;
 use std::cmp::{max, min};
 use std::collections::HashSet;
-use rayon::prelude::*;
 
 advent_of_code::solution!(9);
 
@@ -143,21 +143,23 @@ pub fn part_two(input: &str) -> Option<u64> {
         })
         .collect();
 
-    Some(red_tiles
-        .par_iter()
-        .filter_map(|p| {
-            red_tiles
-                .iter()
-                .filter_map(|p2| {
-                    if p2 != p && is_rect_redgreen_only((*p, *p2), &vert_edges) {
-                        Some((p2.x.abs_diff(p.x) + 1) * (p2.y.abs_diff(p.y) + 1))
-                    } else {
-                        None
-                    }
-                })
-                .reduce(max)
-        })
-        .reduce(||0u64,max))
+    Some(
+        red_tiles
+            .par_iter()
+            .filter_map(|p| {
+                red_tiles
+                    .iter()
+                    .filter_map(|p2| {
+                        if p2 != p && is_rect_redgreen_only((*p, *p2), &vert_edges) {
+                            Some((p2.x.abs_diff(p.x) + 1) * (p2.y.abs_diff(p.y) + 1))
+                        } else {
+                            None
+                        }
+                    })
+                    .reduce(max)
+            })
+            .reduce(|| 0u64, max),
+    )
 }
 
 #[cfg(test)]

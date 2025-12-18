@@ -7,8 +7,8 @@ use advent_of_code::template::Day;
 use std::process;
 
 mod args {
-    use std::ffi::OsString;
     use advent_of_code::template::Day;
+    use std::ffi::OsString;
     use std::process;
 
     pub enum AppArguments {
@@ -45,12 +45,19 @@ mod args {
     }
 
     pub fn parse() -> Result<AppArguments, Box<dyn std::error::Error>> {
-
         let mut os_args: Vec<OsString> = std::env::args_os().collect();
         os_args.remove(0); // remove the executable path.
 
-        let main_args :Vec<OsString> = os_args.iter().take_while(|arg| *arg != "--").cloned().collect();
-        let extra_args: Vec<OsString> = os_args.into_iter().skip_while(|arg| arg != "--").skip(1).collect();
+        let main_args: Vec<OsString> = os_args
+            .iter()
+            .take_while(|arg| *arg != "--")
+            .cloned()
+            .collect();
+        let extra_args: Vec<OsString> = os_args
+            .into_iter()
+            .skip_while(|arg| arg != "--")
+            .skip(1)
+            .collect();
 
         let mut args = pico_args::Arguments::from_vec(main_args);
 
@@ -67,7 +74,7 @@ mod args {
                     all,
                     day: args.opt_free_from_str()?,
                     store,
-                    extra_args
+                    extra_args,
                 }
             }
             Some("download") => AppArguments::Download {
@@ -86,7 +93,7 @@ mod args {
                 release: args.contains("--release"),
                 submit: args.opt_value_from_str("--submit")?,
                 dhat: args.contains("--dhat"),
-                extra_args
+                extra_args,
             },
             #[cfg(feature = "today")]
             Some("today") => AppArguments::Today,
@@ -116,8 +123,16 @@ fn main() {
             std::process::exit(1);
         }
         Ok(args) => match args {
-            AppArguments::All { release, extra_args } => all::handle(release, &extra_args),
-            AppArguments::Time { day, all, store, extra_args } => time::handle(day, all, store, &extra_args),
+            AppArguments::All {
+                release,
+                extra_args,
+            } => all::handle(release, &extra_args),
+            AppArguments::Time {
+                day,
+                all,
+                store,
+                extra_args,
+            } => time::handle(day, all, store, &extra_args),
             AppArguments::Download { day } => download::handle(day),
             AppArguments::Read { day } => read::handle(day),
             AppArguments::Scaffold {
@@ -136,7 +151,7 @@ fn main() {
                 dhat,
                 submit,
                 extra_args,
-            } => solve::handle(day, release, dhat, submit,&extra_args),
+            } => solve::handle(day, release, dhat, submit, &extra_args),
             #[cfg(feature = "today")]
             AppArguments::Today => {
                 match Day::today() {
